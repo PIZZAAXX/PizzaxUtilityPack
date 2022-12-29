@@ -1,0 +1,13 @@
+name: PizzaxUtilityPack
+version: '${version}'
+main: pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack
+
+commands:
+  pupreload:
+    description: Reload the plugin's configuration.
+    permission: pizzaxutilitypack.admin
+
+permissions:
+  pizzaxutilitypack.admin:
+    description: "Plugin management permissions."
+    default: op

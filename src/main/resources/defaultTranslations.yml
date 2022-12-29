@@ -1,0 +1,14 @@
+findcolor:
+  commandName: "findcolor"
+  commandDescription: "Find the closest minecraft textures to a certain color or a certain image."
+  hexSubcommandName: "color"
+  hexSubcommandDescription: "Find textures based on an hexadecimal code of a color."
+  hexParamName: "hexCode"
+  hexParamDescription: "The hexadecimal code of the color to use."
+  fileSubcommandName: "image"
+  fileSubcommandDescription: "Find textures using the average color of an image."
+  fileParamName: "image"
+  fileParamDescription: "The image to use."
+pattern:
+  commandName: "pattern"
+  commandDescription: "Create a pattern of blocks using WorldEdit's block pattern syntax."
