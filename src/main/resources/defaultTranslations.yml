@@ -13,6 +13,7 @@ findcolor:
   validHex: "Please enter a valid hex code."
   nonImageFile: "Please upload an image."
   imageTooLarge: "The image is too large."
+  embedTitle: "Closest textures to the color $hex$"
 pattern:
   commandName: "pattern"
   commandDescription: "Create a pattern of blocks using WorldEdit's block pattern syntax."

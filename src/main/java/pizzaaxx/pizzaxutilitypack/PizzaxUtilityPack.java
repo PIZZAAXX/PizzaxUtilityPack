@@ -11,6 +11,7 @@ import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public final class PizzaxUtilityPack extends JavaPlugin {
 
@@ -103,7 +104,13 @@ public final class PizzaxUtilityPack extends JavaPlugin {
         } else {
             return inputStream;
         }
+    }
 
+    public File[] getResourceFolderFiles(String folder) {
+        ClassLoader loader = getClass().getClassLoader();
+        URL url = loader.getResource(folder);
+        String path = url.getPath();
+        return new File(path).listFiles();
     }
 
 }
