@@ -9,6 +9,10 @@ findcolor:
   fileSubcommandDescription: "Find textures using the average color of an image."
   fileParamName: "image"
   fileParamDescription: "The image to use."
+  errorOccurred: "An error has occurred."
+  validHex: "Please enter a valid hex code."
+  nonImageFile: "Please upload an image."
+  imageTooLarge: "The image is too large."
 pattern:
   commandName: "pattern"
   commandDescription: "Create a pattern of blocks using WorldEdit's block pattern syntax."
