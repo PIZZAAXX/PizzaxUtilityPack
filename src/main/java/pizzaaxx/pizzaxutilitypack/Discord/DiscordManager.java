@@ -8,8 +8,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
 import pizzaaxx.pizzaxutilitypack.Configuration.Configuration;
+import pizzaaxx.pizzaxutilitypack.Discord.Commands.FindColorListener;
 import pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack;
 import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
+
+import java.io.IOException;
 
 public class DiscordManager {
 
@@ -44,6 +47,14 @@ public class DiscordManager {
 
         );
         jdaBuilder.setStatus(OnlineStatus.ONLINE);
+
+        FindColorListener findColorListener;
+        try {
+            findColorListener = new FindColorListener(plugin);
+            jdaBuilder.addEventListeners(findColorListener);
+        } catch (IOException e) {
+            plugin.error("Error starting FindColor command listener. Command won't be enabled.");
+        }
 
         try {
             bot = jdaBuilder.build().awaitReady();
