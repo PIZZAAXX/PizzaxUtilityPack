@@ -3,7 +3,7 @@ version: '${version}'
 main: pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack
 
 commands:
-  pupreload:
+  pizzaxup:
     description: Reload the plugin's configuration.
     permission: pizzaxutilitypack.admin
 

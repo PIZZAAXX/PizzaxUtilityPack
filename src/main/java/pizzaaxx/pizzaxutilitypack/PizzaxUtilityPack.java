@@ -1,11 +1,11 @@
 package pizzaaxx.pizzaxutilitypack;
 
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import pizzaaxx.pizzaxutilitypack.Discord.DiscordHandler;
+import pizzaaxx.pizzaxutilitypack.Discord.DiscordManager;
+import pizzaaxx.pizzaxutilitypack.Minecraft.Admin.AdminCommand;
 import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
 
 import java.io.File;
@@ -20,16 +20,22 @@ public final class PizzaxUtilityPack extends JavaPlugin {
         return folder;
     }
 
-    private DiscordHandler discordHandler;
+    private DiscordManager discordManager;
 
-    public DiscordHandler getDiscordHandler() {
-        return discordHandler;
+    public DiscordManager getDiscordManager() {
+        return discordManager;
     }
 
     private TranslationsManager translationsManager;
 
     public TranslationsManager getTranslationsManager() {
         return translationsManager;
+    }
+
+    private ConfigManager configManager;
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 
     @Override
@@ -40,70 +46,38 @@ public final class PizzaxUtilityPack extends JavaPlugin {
         this.log(" ");
 
         if (!folder.exists()) {
-            if (!folder.mkdir()) {
-                this.error("The plugin's folder couldn't be created. Stopping plugin's initialization.");
-                return;
-            }
-
-            File config = new File(this.folder, "config.yml");
-
-            try {
-                config.createNewFile();
-            } catch (IOException e) {
-                this.error("A configuration file couldn't be created. Stopping plugin's initialization.");
-                return;
-            }
-
-            this.log("The plugin's folder and a configuration file have been created. Please check the configuration file.");
-            this.log("Enter the Discord bot's token into the configuration file.");
-            this.warn("Use §6/pupreload§e to reload the configuration and enable the Discord features.");
-            return;
+            folder.mkdir();
         }
 
-        File translations = new File(this.folder, "translations");
-
-        if (!translations.exists()) {
-
-            try {
-                translations.createNewFile();
-            } catch (IOException e) {
-                this.warn("A translations file couldn't be created. Stopping plugin's initialization.");
-                return;
-            }
-
-            this.warn("No translations file has been found. A new file with default translations has been created.");
-        }
-
-        this.translationsManager = new TranslationsManager(this);
-
+        translationsManager = new TranslationsManager(this);
         try {
-            this.translationsManager.reload();
+            translationsManager.reload();
         } catch (IOException | InvalidConfigurationException e) {
-            this.error("Error loading internal default translations. Stopping plugin's initialization.");
+            this.error("Error loading translations. Plugin stopped.");
             return;
         }
 
-        File config = new File(this.folder, "config.yml");
-
+        configManager = new ConfigManager(this);
         try {
-            if (config.createNewFile()) {
-                this.log("A configuration file has been created.");
-                this.log("Enter the Discord bot's token into the configuration file.");
-                this.warn("Use §6/pupreload§e to reload the configuration and enable the Discord features.");
-            } else {
-                discordHandler = new DiscordHandler(this);
-                discordHandler.reload();
-            }
-        } catch (IOException e) {
-            this.error("A configuration file couldn't be created. Stopping plugin's initialization.");
+            configManager.reload();
+        } catch (IOException | InvalidConfigurationException e) {
+            this.error("Error loading configuration. Plugin stopped.");
+            return;
         }
+
+        discordManager = new DiscordManager(this);
+        discordManager.reload();
+
+        getCommand("pizzaxup").setExecutor(new AdminCommand(this));
 
     }
 
     @Override
     public void onDisable() {
 
-
+        if (discordManager.getBot() != null) {
+            discordManager.getBot().shutdownNow();
+        }
 
     }
 

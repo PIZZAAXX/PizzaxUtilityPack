@@ -1,0 +1,5 @@
+token: Enter token here
+
+features:
+  findcolor: true
+  pattern: true

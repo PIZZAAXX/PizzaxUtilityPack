@@ -12,3 +12,5 @@ findcolor:
 pattern:
   commandName: "pattern"
   commandDescription: "Create a pattern of blocks using WorldEdit's block pattern syntax."
+  patternParamName: "pattern"
+  patternParamDescription: "The pattern to use."
