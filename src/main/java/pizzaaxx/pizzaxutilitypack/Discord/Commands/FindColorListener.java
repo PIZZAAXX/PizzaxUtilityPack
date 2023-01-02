@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import pizzaaxx.pizzaxutilitypack.Discord.DiscordUtils;
 import pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack;
@@ -17,6 +18,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
@@ -30,15 +32,19 @@ public class FindColorListener extends ListenerAdapter {
 
     private final List<String> allowedFileExtensions = Arrays.asList("png", "jpeg", "jpg");
 
-    private final Map<BufferedImage, Color> colors = new HashMap<>();
+    private final Map<Image, Color> colors = new HashMap<>();
 
-    public FindColorListener(@NotNull PizzaxUtilityPack plugin) throws IOException {
+    public FindColorListener(@NotNull PizzaxUtilityPack plugin) throws IOException, URISyntaxException {
         this.plugin = plugin;
         this.translations = plugin.getTranslationsManager();
 
-        for (File textureFile : plugin.getResourceFolderFiles("textures")) {
+        this.loadImages();
+    }
 
-            InputStream stream = Files.newInputStream(textureFile.toPath());
+    public void loadImages() throws URISyntaxException, IOException {
+        colors.clear();
+
+        for (InputStream stream : plugin.getStreamsFromFolder("textures")) {
             BufferedImage texture = ImageIO.read(stream);
 
             int sumR = 0, sumG = 0, sumB = 0;
@@ -53,14 +59,39 @@ public class FindColorListener extends ListenerAdapter {
             int num = texture.getWidth() * texture.getHeight();
             Color color = new Color(sumR / num, sumG / num, sumB / num);
 
-            BufferedImage resizedTexture = new BufferedImage(256, 256, 1);
-            AffineTransform at = new AffineTransform();
-            at.scale(16.0, 16.0);
-            AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            resizedTexture = scaleOp.filter(texture, resizedTexture);
+            Image resizedTexture = texture.getScaledInstance(256, 256, Image.SCALE_DEFAULT);
 
             colors.put(resizedTexture, color);
         }
+        File texturesFile = new File(plugin.getFolder(), "extraTextures");
+        if (!texturesFile.exists()) {
+            texturesFile.mkdir();
+        } else {
+            File[] files = texturesFile.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    InputStream stream = new FileInputStream(file);
+                    BufferedImage texture = ImageIO.read(stream);
+
+                    int sumR = 0, sumG = 0, sumB = 0;
+                    for (int x = 0; x < texture.getWidth(); x++) {
+                        for (int y = 0; y < texture.getHeight(); y++) {
+                            Color pixel = new Color(texture.getRGB(x, y));
+                            sumR += pixel.getRed();
+                            sumG += pixel.getGreen();
+                            sumB += pixel.getBlue();
+                        }
+                    }
+                    int num = texture.getWidth() * texture.getHeight();
+                    Color color = new Color(sumR / num, sumG / num, sumB / num);
+
+                    Image resizedTexture = texture.getScaledInstance(256, 256, Image.SCALE_DEFAULT);
+
+                    colors.put(resizedTexture, color);
+                }
+            }
+        }
+
     }
 
     @Override
@@ -144,22 +175,22 @@ public class FindColorListener extends ListenerAdapter {
                 return;
             }
 
-            Map<BufferedImage, Double> distances = new HashMap<>();
-            for (Map.Entry<BufferedImage, Color> entry : colors.entrySet()) {
+            Map<Image, Double> distances = new HashMap<>();
+            for (Map.Entry<Image, Color> entry : colors.entrySet()) {
                 distances.put(entry.getKey(), this.colorDistance(color, entry.getValue()));
             }
 
-            List<Map.Entry<BufferedImage, Double>> textureEntries = new ArrayList<>(distances.entrySet());
+            List<Map.Entry<Image, Double>> textureEntries = new ArrayList<>(distances.entrySet());
             textureEntries.sort(Map.Entry.comparingByValue());
 
             BufferedImage result = new BufferedImage(
-                    768, 216, 1
+                    768, 256, 1
             );
             Graphics2D graphics = result.createGraphics();
 
             graphics.drawImage(textureEntries.get(0).getKey(), 0, 0, null);
-            graphics.drawImage(textureEntries.get(1).getKey(), 0, 0, null);
-            graphics.drawImage(textureEntries.get(2).getKey(), 0, 0, null);
+            graphics.drawImage(textureEntries.get(1).getKey(), 256, 0, null);
+            graphics.drawImage(textureEntries.get(2).getKey(), 512, 0, null);
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
@@ -173,7 +204,7 @@ public class FindColorListener extends ListenerAdapter {
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setColor(color);
-            embed.setTitle(translations.get("embedTitle").replace("$color$", hex));
+            embed.setTitle(translations.get("findcolor.embedTitle").replace("$hex$", hex));
             embed.setImage("attachment://img.png");
 
             event.replyFiles(
@@ -187,7 +218,7 @@ public class FindColorListener extends ListenerAdapter {
     private void error(@NotNull SlashCommandInteractionEvent event, String translationName) {
         event.replyEmbeds(DiscordUtils.fastEmbed(
                 Color.RED,
-                translations.get(translationName)
+                translations.get("findcolor." + translationName)
         )).queue(
                 msg -> msg.deleteOriginal().queueAfter(20, TimeUnit.SECONDS)
         );

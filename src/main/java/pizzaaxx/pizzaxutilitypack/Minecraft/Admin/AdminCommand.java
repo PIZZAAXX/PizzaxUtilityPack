@@ -7,6 +7,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class AdminCommand implements CommandExecutor {
 
@@ -27,8 +28,9 @@ public class AdminCommand implements CommandExecutor {
                     try {
                         plugin.getTranslationsManager().reload();
                         plugin.getConfigManager().reload();
+                        plugin.getDiscordManager().getFindColorListener().loadImages();
                         sender.sendMessage(PREFIX + "Reloading succesful.");
-                    } catch (IOException | InvalidConfigurationException e) {
+                    } catch (IOException | InvalidConfigurationException | URISyntaxException e) {
                         sender.sendMessage(PREFIX + "An error has occurred while reloading.");
                     }
                     break;

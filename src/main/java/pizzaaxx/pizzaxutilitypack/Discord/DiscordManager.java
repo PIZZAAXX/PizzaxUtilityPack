@@ -13,11 +13,18 @@ import pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack;
 import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class DiscordManager {
 
     private final PizzaxUtilityPack plugin;
     private final TranslationsManager translations;
+    private FindColorListener findColorListener;
+
+    public FindColorListener getFindColorListener() {
+        return findColorListener;
+    }
+
     private Configuration config;
 
     private JDA bot;
@@ -48,11 +55,10 @@ public class DiscordManager {
         );
         jdaBuilder.setStatus(OnlineStatus.ONLINE);
 
-        FindColorListener findColorListener;
         try {
             findColorListener = new FindColorListener(plugin);
             jdaBuilder.addEventListeners(findColorListener);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             plugin.error("Error starting FindColor command listener. Command won't be enabled.");
         }
 

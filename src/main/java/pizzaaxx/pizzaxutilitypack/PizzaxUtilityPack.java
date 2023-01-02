@@ -11,7 +11,17 @@ import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class PizzaxUtilityPack extends JavaPlugin {
 
@@ -106,11 +116,48 @@ public final class PizzaxUtilityPack extends JavaPlugin {
         }
     }
 
-    public File[] getResourceFolderFiles(String folder) {
-        ClassLoader loader = getClass().getClassLoader();
-        URL url = loader.getResource(folder);
-        String path = url.getPath();
-        return new File(path).listFiles();
+    public List<InputStream> getStreamsFromFolder(String folder) throws URISyntaxException, IOException {
+        List<Path> paths = this.getPathsFromResourceJAR(folder);
+        if (paths == null) {
+            paths = new ArrayList<>();
+        }
+
+        List<InputStream> streams = new ArrayList<>();
+
+        for (Path path : paths) {
+            String filePathInJAR = path.toString();
+            if (filePathInJAR.startsWith("/")) {
+                filePathInJAR = filePathInJAR.substring(1, filePathInJAR.length());
+            }
+
+            InputStream is = this.getFileFromResourceAsStream(filePathInJAR);
+            streams.add(is);
+        }
+
+        return streams;
+    }
+
+    private List<Path> getPathsFromResourceJAR(String folder)
+            throws URISyntaxException, IOException {
+
+        List<Path> result;
+
+        // get path of the current running JAR
+        String jarPath = getClass().getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .toURI()
+                .getPath();
+
+        // file walks JAR
+        URI uri = URI.create("jar:file:" + jarPath);
+        try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+            result = Files.walk(fs.getPath(folder))
+                    .filter(Files::isRegularFile)
+                    .collect(Collectors.toList());
+        }
+
+        return result;
     }
 
 }
