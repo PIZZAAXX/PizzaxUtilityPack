@@ -19,3 +19,6 @@ pattern:
   commandDescription: "Create a pattern of blocks using WorldEdit's block pattern syntax."
   patternParamName: "pattern"
   patternParamDescription: "The pattern to use."
+  errorOccurred: "An error has occurred."
+  patternError: "Please enter a valid pattern. Error: $section$"
+  invalidID: "Please enter a valid ID. Error: $section$"
