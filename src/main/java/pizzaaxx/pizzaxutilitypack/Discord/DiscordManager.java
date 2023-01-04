@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
 import pizzaaxx.pizzaxutilitypack.Configuration.Configuration;
 import pizzaaxx.pizzaxutilitypack.Discord.Commands.FindColorListener;
+import pizzaaxx.pizzaxutilitypack.Discord.Commands.PatternListener;
 import pizzaaxx.pizzaxutilitypack.PizzaxUtilityPack;
 import pizzaaxx.pizzaxutilitypack.Translations.TranslationsManager;
 
@@ -58,6 +59,7 @@ public class DiscordManager {
         try {
             findColorListener = new FindColorListener(plugin);
             jdaBuilder.addEventListeners(findColorListener);
+            jdaBuilder.addEventListeners(new PatternListener(plugin));
         } catch (IOException | URISyntaxException e) {
             plugin.error("Error starting FindColor command listener. Command won't be enabled.");
         }
